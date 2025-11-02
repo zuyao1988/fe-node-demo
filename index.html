@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Vue + Node Demo</title>
+    <link
+      href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css"
+      rel="stylesheet"
+    />
+    <script src="https://unpkg.com/vue@3/dist/vue.global.prod.js"></script>
+    <style>
+      .fade-enter-active,
+      .fade-leave-active {
+        transition: opacity 0.3s ease;
+      }
+      .fade-enter-from,
+      .fade-leave-to {
+        opacity: 0;
+      }
+    </style>
+  </head>
+  <body class="bg-gray-50 min-h-screen">
+    <div id="app">
+      <!-- Header -->
+      <div class="bg-blue-600 text-white shadow-lg">
+        <div class="container mx-auto px-4 py-6">
+          <h1 class="text-3xl font-bold">Vue + Node Demo</h1>
+          <p class="text-blue-100">Modern full-stack application</p>
+        </div>
+      </div>
+
+      <!-- Navigation Tabs -->
+      <div class="bg-white shadow-sm border-b">
+        <div class="container mx-auto px-4">
+          <div class="flex space-x-1">
+            <button
+              @click="activeTab='home'"
+              :class="[
+                'px-6 py-3 font-medium rounded-t-lg transition-all duration-200',
+                activeTab === 'home' 
+                  ? 'bg-white text-blue-600 border-t-2 border-blue-600' 
+                  : 'text-gray-600 hover:text-blue-500 hover:bg-gray-50'
+              ]"
+            >
+              🏠 Home
+            </button>
+            <button
+              @click="loadUsers"
+              :class="[
+                'px-6 py-3 font-medium rounded-t-lg transition-all duration-200',
+                activeTab === 'users' 
+                  ? 'bg-white text-blue-600 border-t-2 border-blue-600' 
+                  : 'text-gray-600 hover:text-blue-500 hover:bg-gray-50'
+              ]"
+            >
+              👥 Users
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Main Content -->
+      <div class="container mx-auto px-4 py-8">
+        <!-- Home Tab -->
+        <div v-if="activeTab === 'home'" class="fade-enter-active">
+          <div class="bg-white rounded-lg shadow-md p-8 text-center">
+            <div
+              class="w-20 h-20 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4"
+            >
+              <span class="text-3xl">🚀</span>
+            </div>
+            <h2 class="text-2xl font-bold text-gray-800 mb-4">Welcome Home</h2>
+            <p class="text-gray-600 max-w-md mx-auto">
+              This is a demo application showcasing Vue.js frontend with Node.js
+              backend. Click the "Users" tab to manage user data.
+            </p>
+          </div>
+        </div>
+
+        <!-- Users Tab -->
+        <div v-if="activeTab === 'users'" class="fade-enter-active">
+          <!-- Add User Form -->
+          <div class="bg-white rounded-lg shadow-md p-6 mb-6">
+            <h3 class="text-lg font-semibold text-gray-800 mb-4">
+              Add New User
+            </h3>
+            <form
+              @submit.prevent="addUser"
+              class="flex flex-col sm:flex-row gap-4"
+            >
+              <input
+                v-model="newUser.name"
+                placeholder="Full Name"
+                required
+                class="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              />
+              <input
+                v-model.number="newUser.age"
+                type="number"
+                placeholder="Age"
+                required
+                class="w-32 px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              />
+              <button
+                type="submit"
+                class="px-6 py-2 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+              >
+                Add User
+              </button>
+            </form>
+          </div>
+
+          <!-- User List -->
+          <div class="bg-white rounded-lg shadow-md overflow-hidden">
+            <div class="px-6 py-4 border-b border-gray-200">
+              <h3 class="text-lg font-semibold text-gray-800">User List</h3>
+            </div>
+            <div class="overflow-x-auto">
+              <table class="min-w-full">
+                <thead class="bg-gray-50">
+                  <tr>
+                    <th
+                      class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                    >
+                      ID
+                    </th>
+                    <th
+                      class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                    >
+                      Name
+                    </th>
+                    <th
+                      class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                    >
+                      Age
+                    </th>
+                  </tr>
+                </thead>
+                <tbody class="bg-white divide-y divide-gray-200">
+                  <tr
+                    v-for="u in users"
+                    :key="u.id"
+                    @click="selectUser(u.id)"
+                    class="hover:bg-gray-50 transition-colors duration-150 cursor-pointer"
+                  >
+                    <td
+                      class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900"
+                    >
+                      {{u.id}}
+                    </td>
+                    <td
+                      class="px-6 py-4 whitespace-nowrap text-sm text-gray-700"
+                    >
+                      {{u.name}}
+                    </td>
+                    <td
+                      class="px-6 py-4 whitespace-nowrap text-sm text-gray-700"
+                    >
+                      {{u.age}}
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+              <div v-if="!users.length" class="text-center py-8">
+                <p class="text-gray-500">
+                  No users found. Add your first user above!
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <!-- User Detail -->
+          <div
+            v-if="selectedUser"
+            class="mt-6 bg-white rounded-lg shadow-md p-6"
+          >
+            <h3
+              class="text-lg font-semibold text-gray-800 mb-4 flex items-center"
+            >
+              <span class="mr-2">👤</span> User Details
+            </h3>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div class="bg-blue-50 rounded-lg p-4">
+                <p class="text-sm text-blue-600 font-medium">ID</p>
+                <p class="text-lg font-semibold text-gray-800">
+                  {{selectedUser.id}}
+                </p>
+              </div>
+              <div class="bg-green-50 rounded-lg p-4">
+                <p class="text-sm text-green-600 font-medium">Name</p>
+                <p class="text-lg font-semibold text-gray-800">
+                  {{selectedUser.name}}
+                </p>
+              </div>
+              <div class="bg-purple-50 rounded-lg p-4">
+                <p class="text-sm text-purple-600 font-medium">Age</p>
+                <p class="text-lg font-semibold text-gray-800">
+                  {{selectedUser.age}}
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      const { createApp } = Vue;
+
+      createApp({
+        data() {
+          return {
+            activeTab: "home",
+            users: [],
+            selectedUser: null,
+            newUser: { name: "", age: "" },
+          };
+        },
+        methods: {
+          async loadUsers() {
+            this.activeTab = "users";
+            try {
+              const res = await fetch("/api/users");
+              this.users = await res.json();
+              this.selectedUser = null;
+            } catch (error) {
+              console.error("Error loading users:", error);
+            }
+          },
+          async selectUser(id) {
+            try {
+              const res = await fetch(`/api/users/${id}`);
+              this.selectedUser = await res.json();
+            } catch (error) {
+              console.error("Error loading user details:", error);
+            }
+          },
+          async addUser() {
+            try {
+              const res = await fetch("/api/users", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(this.newUser),
+              });
+              const user = await res.json();
+              this.users.push(user);
+              this.newUser = { name: "", age: "" };
+            } catch (error) {
+              console.error("Error adding user:", error);
+            }
+          },
+        },
+      }).mount("#app");
+    </script>
+  </body>
+</html>
