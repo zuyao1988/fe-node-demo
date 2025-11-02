@@ -1,9 +1,33 @@
+# version: "3.8"
+# services:
+#   app:
+#     build: .
+#     ports:
+#       - "3000:3000"
+#     environment:
+#       # You can test passing environment variables here
+#       - NODE_ENV=production
+
 version: "3.8"
+
 services:
   app:
     build: .
-    ports:
-      - "3000:3000"
+    container_name: app
+    expose:
+      - "3000" # internal only (don't publish to host)
     environment:
-      # You can test passing environment variables here
       - NODE_ENV=production
+    restart: always
+
+  proxy:
+    image: jc21/nginx-proxy-manager:latest
+    container_name: nginx-proxy-manager
+    restart: always
+    ports:
+      - "80:80" # HTTP
+      - "443:443" # HTTPS
+      - "81:81" # Admin UI
+    volumes:
+      - ./data:/data
+      - ./letsencrypt:/etc/letsencrypt
